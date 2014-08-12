@@ -105,7 +105,7 @@ namespace udpFastPing
         /// <param name="logFilePath"></param>
         /// <param name="maxDiffCount"></param>
         /// <returns>0: success, other value : failure</returns>
-        static int writeLogsToFile(List<MyLog> logList, string logFilePath, int maxDiffCount)
+        static int writeLogsToFile(List<MyLog> logList, string logFilePath, int maxDiffCount, int maxDiffLine)
         {
             try
             {
@@ -116,6 +116,7 @@ namespace udpFastPing
 
                 using (StreamWriter sw = new StreamWriter(logFilePath))
                 {
+                    sw.WriteLine("maxDiffLine     : {0} ", maxDiffLine + 6);
                     sw.WriteLine("maxDiffCount    : {0} ", maxDiffCount);
                     sw.WriteLine("maxDiffTime(ms) : {0} ", logList[maxDiffCount].diffms);
                     sw.WriteLine("=================================");
@@ -142,11 +143,13 @@ namespace udpFastPing
         /// </summary>
         /// <param name="logList"></param>
         /// <param name="maxDiffCount"></param>
+        /// <param name="maxDiffLine"></param>
         /// <returns>0: success, other value : failure</returns>
-        static int calculateRecvDiffms(List<MyLog> logList, out int maxDiffCount)
+        static int calculateRecvDiffms(List<MyLog> logList, out int maxDiffCount, out int maxDiffLine)
         {
             double maxDiffms = 0.0;
             maxDiffCount = -1;
+            maxDiffLine = -1;
 
             for (int i = 1; i < logList.Count; i++)
             {
@@ -154,7 +157,8 @@ namespace udpFastPing
                 if (logList[i].diffms > maxDiffms)
                 {
                     maxDiffms = logList[i].diffms;
-                    maxDiffCount = i;
+                    maxDiffCount = logList[i].count;
+                    maxDiffLine = i;
                 }
             }
 
@@ -179,6 +183,8 @@ namespace udpFastPing
         {
             List<string> stringList = new List<string>();
             List<DateTime> dateList = new List<DateTime>();
+
+            Console.WriteLine("start receiving ... ");
 
             using (UdpClient listener = new UdpClient(selfPort))
             {
@@ -215,13 +221,16 @@ namespace udpFastPing
             }
 
             int maxDiffCount;
-            if (0 != calculateRecvDiffms(logList, out maxDiffCount))
+            int maxDiffLine;
+            if (0 != calculateRecvDiffms(logList, out maxDiffCount, out maxDiffLine))
             {
                 Console.WriteLine("[WARN] calculate recv diff ms failed.");
                 return 1;
             }
 
-            return writeLogsToFile(logList, logFilePath, maxDiffCount);
+            Console.WriteLine("receiving over");
+
+            return writeLogsToFile(logList, logFilePath, maxDiffCount, maxDiffLine);
         }
 
         /// <summary>
