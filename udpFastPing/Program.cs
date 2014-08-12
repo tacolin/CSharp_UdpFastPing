@@ -116,8 +116,8 @@ namespace udpFastPing
 
                 using (StreamWriter sw = new StreamWriter(logFilePath))
                 {
-                    sw.WriteLine("maxDiffCount: {0} ", maxDiffCount);
-                    sw.WriteLine("maxDiffTime : {0} ms", logList[maxDiffCount].diffms);
+                    sw.WriteLine("maxDiffCount    : {0} ", maxDiffCount);
+                    sw.WriteLine("maxDiffTime(ms) : {0} ", logList[maxDiffCount].diffms);
                     sw.WriteLine("=================================");
                     sw.WriteLine("");
 
